@@ -2,52 +2,6 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/*
-*
-* Commands:
-
-1. Check:::{substring}
-If the key contains the substring, print:
-"{key} contains {substring}"
-Otherwise:
-"Substring not found!"
-
-2. Change:::Upper/Lower:::{startIndex}:::{endIndex}
-Change the substring between the given indices (endIndex is exclusive) to upper or lower case.
-Print the new key.
-
-3. Remove:::{startIndex}:::{endIndex}
-Remove the substring between the given indices (endIndex is exclusive).
-Print the new key.
-
-4. Insert:::{index}:::{text}
-Insert the given text at the specified index.
-Print the new key.
-5. Replace:::{oldSubstring}:::{newSubstring}
-Replace all occurrences of oldSubstring with newSubstring.
-If nothing was replaced, print:
-"Nothing to replace!"
-Otherwise, print the new key.
-6. Reverse:::{startIndex}:::{endIndex}
-Reverse the substring between the given indices (endIndex is exclusive) and place it back in the same position.
-Print the new key.
-Input:
-The first line contains the initial security key.
-Each next line contains a command.
-The sequence ends with the command:
-"Finalize"
-Output:
-If the key is invalid, print:
-"Invalid initial key!"
-and stop.
-Otherwise, after processing all commands, print:
-"Your final security key is: {key}"
-
-
-*/
-
- 
-
 public class Main {
 
     private static String key;
@@ -57,70 +11,96 @@ public class Main {
 
         key = scanner.nextLine();
 
-        String command = null;
-
         String regex = "^[A-Za-z0-9_]{6,20}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(key);
 
-        if(!matcher.matches()) {
+        if (!matcher.matches()) {
             System.out.println("Invalid initial key!");
             return;
         }
 
-        while((command = scanner.nextLine())!="Finalize") {
+        String command;
+        while (!(command = scanner.nextLine()).equals("Finalize")) {
             String[] tokens = command.split(":::");
             String action = tokens[0];
 
             switch (action) {
-
-                case"Check":
-                    String substring = tokens[1];
-                    check(substring);
+                case "Check":
+                    check(tokens[1]);
                     break;
-
-                case"Change":
-                    String state = tokens[1];
-                    Integer firstIndex = Integer.parseInt(tokens[2]);
-                    Integer secondIndex = Integer.parseInt(tokens[3]);
-                    change(state,firstIndex,secondIndex);
+                case "Change":
+                    change(tokens[1], Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]));
                     break;
-
-                case"Remove":
-                     firstIndex = Integer.parseInt(tokens[1]);
-                     secondIndex = Integer.parseInt(tokens[2]);
-                     remove(firstIndex,secondIndex);
+                case "Remove":
+                    remove(Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]));
+                    break;
+                case "Insert":
+                    insert(Integer.parseInt(tokens[1]), tokens[2]);
+                    break;
+                case "Replace":
+                    replace(tokens[1], tokens[2]);
+                    break;
+                case "Reverse":
+                    reverse(Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]));
                     break;
             }
         }
+        System.out.printf("Your final security key is: %s%n", key);
     }
 
     private static void check(String substring) {
-        if(key.contains(substring)) {
-            System.out.printf("%s contains %s%n",key,substring);
+        if (key.contains(substring)) {
+            System.out.printf("%s contains %s%n", key, substring);
         } else {
             System.out.println("Substring not found!");
         }
     }
 
-    private static void change(String state, Integer firstIndex, Integer secondIndex) {
-        String before = key.substring(0,firstIndex);
-        String toChange = key.substring(firstIndex,secondIndex);
+    private static void change(String state, int firstIndex, int secondIndex) {
+        String before = key.substring(0, firstIndex);
+        String toChange = key.substring(firstIndex, secondIndex);
         String finall = key.substring(secondIndex);
 
-        if(state=="Upper") {
+        if (state.equals("Upper")) {
             toChange = toChange.toUpperCase();
-        } else if(state=="Lower") {
+        } else if (state.equals("Lower")) {
             toChange = toChange.toLowerCase();
         }
 
-        String result = before+toChange+finall;
-        key = result;
+        key = before + toChange + finall;
         System.out.println(key);
     }
 
-    private static void remove(Integer firstIndex, Integer secondIndex) {
-        key = key.substring(0,firstIndex)+key.substring(secondIndex);
+    private static void remove(int firstIndex, int secondIndex) {
+        key = key.substring(0, firstIndex) + key.substring(secondIndex);
+        System.out.println(key);
+    }
+
+    private static void insert(int index, String text) {
+        String before = key.substring(0, index);
+        String after = key.substring(index);
+
+        key = before + text + after;
+        System.out.println(key);
+    }
+
+    private static void replace(String oldSubstring, String newSubstring) {
+        if (key.contains(oldSubstring)) {
+            key = key.replace(oldSubstring, newSubstring);
+            System.out.println(key);
+        } else {
+            System.out.println("Nothing to replace!");
+        }
+    }
+
+    private static void reverse(int firstIndex, int secondIndex) {
+        String prefix = key.substring(0, firstIndex);
+        String toChange = key.substring(firstIndex, secondIndex);
+        String suffix = key.substring(secondIndex);
+
+        String reversed = new StringBuilder(toChange).reverse().toString();
+        key = prefix + reversed + suffix;
         System.out.println(key);
     }
 }
